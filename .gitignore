@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+
+# Node / TypeScript
+node_modules/
+dist/
+build/
+
+# Editors
+.DS_Store
+*.swp
+*.swo

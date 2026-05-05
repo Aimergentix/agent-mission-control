@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# validate-agent-work
+# The single "done" sensor. The agent must not claim completion unless this passes.
+# Customize the commands below for your project's toolchain.
+set -euo pipefail
+
+echo "==> validate-agent-work"
+
+# ── Wiring gate ──────────────────────────────────────────────────────────────
+# Set to true after uncommenting at least one real check block below.
+# The script exits with an error until this is done. See START_HERE.md Step 2.
+CHECKS_WIRED=false
+
+if [[ "$CHECKS_WIRED" != "true" ]]; then
+    echo "ERROR: No checks are wired in validate-agent-work." >&2
+    echo "       Set CHECKS_WIRED=true after enabling at least one check block below." >&2
+    echo "       See START_HERE.md Step 2 for instructions." >&2
+    exit 1
+fi
+
+# ── Live-checks guard ─────────────────────────────────────────────────────────
+# Scans this script for active (uncommented) commands in the check-blocks
+# section. Fails if CHECKS_WIRED=true but no real check lines are present.
+_live=$(awk '
+  /^# .* Deterministic checks/ { found=1; next }
+  found && /^[[:space:]]*[^#[:space:]]/ && !/^[[:space:]]*echo / { c++ }
+  END { print c+0 }
+' "$0")
+if [[ "$_live" -eq 0 ]]; then
+    echo "ERROR: CHECKS_WIRED=true but no active check commands found." >&2
+    echo "       Uncomment at least one check block below before setting CHECKS_WIRED=true." >&2
+    exit 1
+fi
+
+# ── Deterministic checks (run in order, fail fast) ───────────────────────────
+
+# Uncomment and adapt the lines that apply to your project.
+
+# --- Python ---
+# python -m ruff format --check .
+# python -m ruff check .
+# python -m mypy .
+# python -m pytest
+
+# --- TypeScript / Node ---
+# npm run format:check
+# npm run lint
+# npm run typecheck
+# npm test
+# npm run build
+
+# --- Generic ---
+# ./scripts/lint
+# ./scripts/typecheck
+# ./scripts/test
+# ./scripts/validate-schemas
+# ./scripts/smoke
+
+echo "==> All checks passed."
